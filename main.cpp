@@ -7,9 +7,9 @@ Create a branch named Part2
  References
  
  
- 1) convert all of the pointer usage (except for 'const char*') to reference types or 
+ 1) convert all of the pointer usage (except for 'const char*') to reference types or
     const reference types **>>> WHERE POSSIBLE <<<**
-        hint: There is no reference equivalent to nullptr.  
+        hint: There is no reference equivalent to nullptr.
         if a pointer (including nullptr) is being returned anywhere, don't try to convert it to a reference.
  
  2) After you finish, click the [run] button.  Clear up any errors or warnings as best you can.
@@ -31,14 +31,10 @@ struct T
 
 struct Lesser                                //4
 {
-    
-    T* compare(T* a, T* b) //5
+    T* compare(T& a, T& b) //5        // 1) Doesn't need to be converted to a reference because compare returns a nullptr
     {
-        if( a != nullptr && b!= nullptr)
-        {
-            if( a->value < b->value ) return a;
-            if( a->value > b->value ) return b;
-        }
+        if( a.value < b.value ) return &a;
+        if( a.value > b.value ) return &b;
         return nullptr;
     }
 };
@@ -46,43 +42,36 @@ struct Lesser                                //4
 struct U
 {
     float terry { 0 }, todd { 0 };
-    float memberFunc(float* updatedValue)      //12
+    float memberFunc(float& updatedValue)      //12
     {
-        if( updatedValue != nullptr)
+        std::cout << "U's terry value: " << terry << std::endl;  //'->' is the member-of-pointer operator
+        terry = updatedValue;
+        std::cout << "U's terry updated value: " << terry << std::endl;
+        while( std::abs(todd - terry) > 0.001f )
         {
-            std::cout << "U's terry value: " << this->terry << std::endl;  //'->' is the member-of-pointer operator
-            this->terry = *updatedValue;
-            std::cout << "U's terry updated value: " << this->terry << std::endl;
-            while( std::abs(this->todd - this->terry) > 0.001f )
-            {
-                //std::cout << "MFtodd: " << this->todd << " MFterry: " << this->terry << std::endl;
-                this->todd += this->terry / 3;   // distance between terry and todd drops
-            }
+            //std::cout << "MFtodd: " << todd << " MFterry: " << terry << std::endl;
+            todd += terry / 3;   // distance between terry and todd drops
         }
-        return this->todd * this->terry;
+        return todd * terry;
     }
 };
 
 struct Struct2
 {
-    static float statFuncA(U* that, float* updatedValue )        //10    //passes pointer to object so objects updated value can be modified
+    static float statFuncA(U& that, float& updatedValue )        //10    //passes pointer to object so objects updated value can be modified
     {
-        if( that != nullptr && updatedValue != nullptr)
+        
+        std::cout << "U's terry value: " << that.terry << std::endl;
+        that.terry = updatedValue;
+        std::cout << "U's terry updated value: " << that.terry << std::endl;
+        while( std::abs(that.todd - that.terry) > 0.001f )
         {
-            std::cout << "U's terry value: " << that->terry << std::endl;
-            that->terry = *updatedValue;
-            std::cout << "U's terry updated value: " << that->terry << std::endl;
-            while( std::abs(that->todd - that->terry) > 0.001f )
-            {
-                /*
-                 write something that makes the distance between that->todd and that->terry get smaller
-                 */
-                //std::cout << "SFtodd: " << that->todd << " SFterry: " << that->terry << std::endl;
-                that->todd += that->terry / 3;
-            }
-        std::cout << "U's todd updated value: " << that->todd << std::endl;
+            //std::cout << "SFtodd: " << that.todd << " SFterry: " << that.terry << std::endl;
+            that.todd += that.terry / 3;
         }
-        return that->todd * that->terry;
+        std::cout << "U's todd updated value: " << that.todd << std::endl;
+      
+        return that.todd * that.terry;
     }
 };
         
@@ -99,23 +88,21 @@ struct Struct2
 
 int main()
 {
-    T terry( 16 , "Terry" );                                             //6
-    T todd( 3, "Todd" );                                             //6
+    T terry( 16 , "Terry" );
+    T todd( 3, "Todd" );
     
-    Lesser f;                                            //7
-    auto* smaller = f.compare(&terry ,&todd );                              //8
-    
-    if( smaller != nullptr)
+    Lesser f;
+    auto* smaller = f.compare(terry ,todd );                             // return type is a pointer to an address of or nullptr
+    if (smaller != nullptr)
     {
-        std::cout << "the smaller one is << " << smaller->name << std::endl; //9
+        std::cout << "the smaller one is << " << smaller->name << std::endl;
     }
-
     U uri;
     float updatedValue = 5.f;
-    std::cout << "[static func] uri's multiplied values: " << Struct2::statFuncA(&uri, &updatedValue) << std::endl;                  //11
+    std::cout << "[static func] uri's multiplied values: " << Struct2::statFuncA(uri, updatedValue) << std::endl;                  //11
 
     U uli;
-    std::cout << "[member func] uli's multiplied values: " << uli.memberFunc( &updatedValue ) << std::endl;
+    std::cout << "[member func] uli's multiplied values: " << uli.memberFunc( updatedValue ) << std::endl;
 }
 
         
