@@ -93,8 +93,10 @@ int main()
     
     Lesser f;
     auto* smaller = f.compare(terry ,todd );                             // return type is a pointer to an address of or nullptr
-    std::cout << "the smaller one is << " << smaller->name << std::endl;
-    
+    if (smaller != nullptr)
+    {
+        std::cout << "the smaller one is << " << smaller->name << std::endl;
+    }
     U uri;
     float updatedValue = 5.f;
     std::cout << "[static func] uri's multiplied values: " << Struct2::statFuncA(uri, updatedValue) << std::endl;                  //11
